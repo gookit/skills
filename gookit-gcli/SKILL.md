@@ -52,7 +52,7 @@ func main() {
 - **多级子命令** - 支持嵌套命令结构
 - **自动帮助生成** - 命令执行错误时提示相似命令
 
-详细用法见 [commands.md](commands.md)
+详细用法见 [references/commands.md](references/commands.md)
 
 ### 选项与参数
 
@@ -61,7 +61,7 @@ func main() {
 - **验证器** - 自定义参数验证
 - **POSIX 风格** - 支持短选项组合 (`-ab`)
 
-详细用法见 [flags-args.md](flags-args.md)
+详细用法见 [references/flags-args.md](references/flags-args.md)
 
 ### 颜色与交互
 
@@ -69,7 +69,7 @@ func main() {
 - **用户交互** - 输入读取、确认选择、多选列表
 - **进度显示** - 进度条、加载动画、文字动态更新
 
-详细用法见 [color-interact.md](color-interact.md)
+详细用法见 [references/color-interact.md](references/color-interact.md)
 
 ### 高级功能
 
@@ -77,18 +77,16 @@ func main() {
 - **独立命令** - 单命令作为独立应用运行
 - **错误处理** - 自动渲染错误提示
 
-详细用法见 [advanced.md](advanced.md)
+详细用法见 [references/advanced.md](references/advanced.md)
 
 ## 常用场景
 
-| 场景 | 参考文档 |
-|------|----------|
-| 创建 CLI 应用 | [commands.md](commands.md) |
-| 绑定选项和参数 | [flags-args.md](flags-args.md) |
-| 添加颜色输出 | [color-interact.md](color-interact.md) |
-| 用户交互输入 | [color-interact.md](color-interact.md) |
-| 显示进度条 | [color-interact.md](color-interact.md) |
-| 生成命令补全 | [advanced.md](advanced.md) |
+| 场景        | 参考文档                                              |
+|-----------|---------------------------------------------------|
+| 创建 CLI 应用 | [references/commands.md](references/commands.md)             |
+| 绑定选项和参数   | [references/flags-args.md](references/flags-args.md)         |
+| 添加颜色输出和用户交互输入   | [references/color-interact.md](references/color-interact.md) |
+| 生成命令补全    | [references/advanced.md](references/advanced.md)                        |
 
 ## 相关链接
 

@@ -217,7 +217,7 @@ miglite status
 
 Detailed documentation is organized into focused guides:
 
-### 📘 [Configuration Guide](docs/CONFIGURATION.md)
+### 📘 [Configuration Guide](references/CONFIGURATION.md)
 Complete configuration reference covering:
 - Configuration priority and loading
 - YAML file format
@@ -227,7 +227,7 @@ Complete configuration reference covering:
 - Multi-environment setup
 - Docker configuration
 
-### 🔧 [CLI Command Reference](docs/CLI_REFERENCE.md)
+### 🔧 [CLI Command Reference](references/CLI_REFERENCE.md)
 Comprehensive CLI documentation:
 - All commands (init, create, up, down, status, show, skip)
 - Command options and flags
@@ -235,7 +235,7 @@ Comprehensive CLI documentation:
 - Common workflows
 - Exit codes
 
-### 📝 [Migration Files Guide](docs/MIGRATION_FILES.md)
+### 📝 [Migration Files Guide](references/MIGRATION_FILES.md)
 Everything about migration files:
 - File naming conventions
 - File structure and sections
@@ -244,7 +244,7 @@ Everything about migration files:
 - Directory organization
 - Best practices for writing migrations
 
-### 📚 [Library Usage Guide](docs/LIBRARY_USAGE.md)
+### 📚 [Library Usage Guide](references/LIBRARY_USAGE.md)
 Using miglite as a Go library:
 - Installation and setup
 - Basic usage examples (4 examples)
@@ -254,7 +254,7 @@ Using miglite as a Go library:
 - Building custom migration tools
 - Docker integration
 
-### 🔍 [API Reference](docs/API_REFERENCE.md)
+### 🔍 [API Reference](references/API_REFERENCE.md)
 Complete API documentation:
 - Migrator type and methods
 - Configuration types
@@ -263,7 +263,7 @@ Complete API documentation:
 - Error handling
 - Thread safety considerations
 
-### ✅ [Best Practices](docs/BEST_PRACTICES.md)
+### ✅ [Best Practices](references/BEST_PRACTICES.md)
 Recommended practices (10 key practices):
 - Writing DOWN migrations
 - Testing migrations
@@ -276,7 +276,7 @@ Recommended practices (10 key practices):
 - Environment management
 - CI/CD integration
 
-### 🔧 [Troubleshooting](docs/TROUBLESHOOTING.md)
+### 🔧 [Troubleshooting](references/TROUBLESHOOTING.md)
 Common issues and solutions:
 - Configuration issues
 - Database connection problems
@@ -320,7 +320,7 @@ miglite skip VERSION          # Skip specific migration
 miglite skip --all            # Skip all pending
 ```
 
-See [CLI Reference](docs/CLI_REFERENCE.md) for detailed documentation.
+See [CLI Reference](references/CLI_REFERENCE.md) for detailed documentation.
 
 ### Library Usage
 
@@ -357,7 +357,7 @@ func main() {
 }
 ```
 
-See [Library Usage Guide](docs/LIBRARY_USAGE.md) for more examples and patterns.
+See [Library Usage Guide](references/LIBRARY_USAGE.md) for more examples and patterns.
 
 ## Resources
 
@@ -419,9 +419,9 @@ See [Library Usage Guide](docs/LIBRARY_USAGE.md) for more examples and patterns.
 
 For questions and issues:
 
-1. Check the [documentation guides](docs/) in this skill
+1. Check the [documentation guides](references/) in this skill
 2. Read the [official README](https://github.com/gookit/miglite/blob/master/README.md)
-3. Review [troubleshooting guide](docs/TROUBLESHOOTING.md)
+3. Review [troubleshooting guide](references/TROUBLESHOOTING.md)
 4. Search [existing issues](https://github.com/gookit/miglite/issues)
 5. Create a [new issue](https://github.com/gookit/miglite/issues/new)
 

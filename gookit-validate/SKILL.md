@@ -44,13 +44,6 @@ ok := validate.Val("test@example.com", "required|email")
 
 ## 主要功能
 
-- [USAGE.md](USAGE.md) - 基础使用指南
-- [VALIDATORS.md](VALIDATORS.md) - 内置验证器参考
-- [ADVANCED.md](ADVANCED.md) - 高级用法（自定义验证器、过滤器、场景等）
-
-## 与 go-playground/validator 对比
-
-- 更轻量，API 更简洁
-- 支持 Map 数据直接验证
-- 内置数据过滤功能
-- 场景验证更灵活
+- [USAGE.md](references/USAGE.md) - 基础使用指南
+- [VALIDATORS.md](references/VALIDATORS.md) - 内置验证器参考
+- [ADVANCED.md](references/ADVANCED.md) - 高级用法（自定义验证器、过滤器、场景等）
