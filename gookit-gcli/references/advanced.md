@@ -21,6 +21,8 @@ go build ./_examples/cliapp.go && ./cliapp genac
 将单个命令作为独立应用运行：
 
 ```go
+import "github.com/gookit/color/colorp"
+
 cmd := gcli.NewCommand("demo", "demo command")
 cmd.Config = func(c *gcli.Command) {
     c.StrOpt(&opt, "opt", "o", "", "option message")

@@ -1,11 +1,6 @@
 ---
 name: gookit-gcli
-description: Go 命令行应用和工具库。支持命令管理、选项/参数绑定、颜色输出、交互输入、进度显示等功能。用于快速构建专业的 CLI 应用程序。
-author: auto-generated
-source: https://github.com/gookit/gcli
-tags: [go, cli, command-line, terminal, interactive, progress, color]
-version: 1.0.0
-generated: 2026-01-28
+description: Go 命令行应用和工具库。支持命令管理、选项/参数绑定、颜色输出、交互输入、进度显示、数据展示等功能。用于快速构建专业的 CLI 应用程序。使用场景：(1) 创建多命令 CLI 应用；(2) 绑定选项/参数（结构体标签或代码绑定）；(3) 颜色输出与终端交互；(4) 进度条与加载动画；(5) 表格/列表数据展示；(6) 生成 bash/zsh 自动补全脚本。
 ---
 
 # Gookit GCli Skill
@@ -71,6 +66,15 @@ func main() {
 
 详细用法见 [references/color-interact.md](references/color-interact.md)
 
+### 数据展示
+
+- **列表** - `show.AList/MList` 输出键值列表
+- **JSON** - `show.JSON(v)` 格式化输出
+- **Banner/Title** - 标题横幅与标题行
+- **表格** - `show/table` 包，支持手动行、struct slice 自动映射、8 种样式
+
+详细用法见 [references/data-show.md](references/data-show.md)
+
 ### 高级功能
 
 - **自动补全** - 生成 bash/zsh 补全脚本
@@ -81,12 +85,13 @@ func main() {
 
 ## 常用场景
 
-| 场景        | 参考文档                                              |
-|-----------|---------------------------------------------------|
-| 创建 CLI 应用 | [references/commands.md](references/commands.md)             |
-| 绑定选项和参数   | [references/flags-args.md](references/flags-args.md)         |
-| 添加颜色输出和用户交互输入   | [references/color-interact.md](references/color-interact.md) |
-| 生成命令补全    | [references/advanced.md](references/advanced.md)                        |
+| 场景            | 参考文档                                                          |
+|---------------|---------------------------------------------------------------|
+| 创建 CLI 应用     | [references/commands.md](references/commands.md)             |
+| 绑定选项和参数       | [references/flags-args.md](references/flags-args.md)         |
+| 颜色输出、交互输入、进度条 | [references/color-interact.md](references/color-interact.md) |
+| 表格、列表、JSON 展示 | [references/data-show.md](references/data-show.md)           |
+| 自动补全、独立命令、错误处理 | [references/advanced.md](references/advanced.md)             |
 
 ## 相关链接
 

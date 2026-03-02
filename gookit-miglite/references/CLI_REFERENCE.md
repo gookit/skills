@@ -420,6 +420,18 @@ Skipped 2 migration(s)
 - `3` - Database connection error
 - `4` - Migration execution error
 
+### exec - Direct Execute SQL
+
+Execute raw SQL queries directly.
+
+- Alias names: `run-sql`, `execute`
+
+**Usage:**
+
+```bash
+miglite exec <SQL|sql-file>
+```
+
 ## Common Workflows
 
 ### Initial Setup

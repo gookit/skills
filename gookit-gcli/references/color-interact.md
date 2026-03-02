@@ -80,7 +80,9 @@ p.Start()
 p.Advance()
 p.Finish()
 
-// 加载动画
-progress.Loading().Start()
+// 加载动画 (spinner)
+sp := progress.LoadingSpinner(progress.RandomCharsTheme(), 100*time.Millisecond)
+sp.Start()
 time.Sleep(2 * time.Second)
+sp.Stop("Done")
 ```

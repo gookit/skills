@@ -15,6 +15,42 @@ cmd.Float64Opt(&f, "name", "shorts", 1.0, "description")
 cmd.VarOpt(&custom, "name", "shorts", "description")
 ```
 
+## 内置自定义类型
+
+gcli 内置了多种实现 `flag.Value` 的类型，直接与 `VarOpt` 配合使用，无需额外引入。
+
+| 类型                | 说明                         | 输入示例                       |
+|-------------------|------------------------------|------------------------------|
+| `gcli.Strings`    | 可重复的字符串列表             | `--tag=a --tag=b`            |
+| `gcli.Ints`       | 可重复的整数列表               | `--id=1 --id=2`              |
+| `gcli.IntsString` | 逗号分隔的整数列表（单次传入）  | `--ids=1,2,3`                |
+| `gcli.Booleans`   | 可重复的布尔列表               | `--flag=true --flag=false`   |
+| `gcli.EnumString` | 枚举字符串（限定允许值）        | `--env=prod`                 |
+| `gcli.KVString`   | 可重复的键值对                 | `--set=k1=v1 --set=k2=v2`   |
+| `gcli.ConfString` | INI 格式配置字符串             | `--conf=k1=v1;k2=v2`        |
+
+```go
+cmd.Config = func(c *gcli.Command) {
+    // 多值字符串列表: --tag=a --tag=b
+    var tags gcli.Strings
+    c.VarOpt(&tags, "tag", "t", "add build tags")
+
+    // 枚举限定: --env=dev|test|prod
+    var env gcli.EnumString
+    env.SetEnum([]string{"dev", "test", "prod"})
+    c.VarOpt(&env, "env", "e", "target environment")
+
+    // 键值对: --set=key=value (可重复)
+    var opts gcli.KVString
+    c.VarOpt(&opts, "set", "s", "set key=value options")
+}
+
+// 读取值
+fmt.Println(tags.Strings()) // []string{"a", "b"}
+fmt.Println(env.String())   // "prod"
+fmt.Println(opts.Data())    // maputil.SMap{"key": "value"} (即 map[string]string)
+```
+
 ## 结构体标签绑定
 
 ```go
