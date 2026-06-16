@@ -30,13 +30,13 @@ var (
 c := cflag.New()
 
 // String 标志，带短选项
-c.StrVar(&name, "name", "n", "", "Your name")
+c.StrVar(&name, "name", "", "Your name;;n")
 
 // Int 标志
-c.IntVar(&age, "age", "a", 0, "Your age")
+c.IntVar(&age, "age", 0, "Your age;;a")
 
 // Bool 标志
-c.BoolVar(&verbose, "verbose", "v", false, "Verbose output")
+c.BoolVar(&verbose, "verbose", false, "Verbose output;;v")
 
 // 解析命令行参数
 c.Parse()
@@ -76,13 +76,13 @@ c.StrVar(&config, "config", "c", "config.yml", "Config file")
 
 ```go
 var port int
-c.IntVar(&port, "port", "p", 8080, "Server port")
+c.IntVar(&port, "port", 8080, "Server port;;p")
 
 var count int64
 c.Int64Var(&count, "count", "", 0, "Item count")
 
 var size uint
-c.UintVar(&size, "size", "s", 0, "Buffer size")
+c.UintVar(&size, "size", 0, "Buffer size;;s")
 ```
 
 ### Boolean 标志
@@ -99,19 +99,37 @@ c.BoolVar(&debug, "debug", "d", false, "Debug mode")
 
 ```go
 var threshold float64
-c.Float64Var(&threshold, "threshold", "t", 0.5, "Threshold value")
+c.Float64Var(&threshold, "threshold", 0.5, "Threshold value;;t")
 ```
 
 ### Slice 标志
 
 ```go
 var tags []string
-c.StrSliceVar(&tags, "tags", "t", nil, "Tags list")
+c.StrSliceVar(&tags, "tags", nil, "Tags list;;t")
 // 用法: --tags=tag1,tag2,tag3
 
 var ports []int
-c.IntSliceVar(&ports, "ports", "", nil, "Port list")
+c.IntSliceVar(&ports, "ports", nil, "Port list")
 // 用法: --ports=8080,8081,8082
+```
+
+## 绑定参数
+
+支持按位置绑定剩余参数：
+
+```go
+// 格式
+c.AddArg("name", "description", [required:bool], [is_array:bool])
+
+// eg
+c.AddArg("file", "file name")
+```
+
+获取值：
+
+```go
+fileName := c.Arg("file").String()
 ```
 
 ## 简单示例

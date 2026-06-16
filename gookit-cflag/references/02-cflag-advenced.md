@@ -12,7 +12,7 @@ var logLevel string
 
 // 创建枚举并指定允许的值
 enumLevel := cflag.NewEnumString("debug", "info", "warn", "error")
-c.Var(enumLevel, "level", "l", "Log level")
+c.Var(enumLevel, "level", "Log level;;l")
 
 c.MustParse()
 logLevel = enumLevel.String()
@@ -25,7 +25,7 @@ logLevel = enumLevel.String()
 ```go
 // 创建键值对标志
 kvFlag := cflag.NewKVString()
-c.Var(kvFlag, "env", "e", "Environment variables")
+c.Var(kvFlag, "env", "Environment variables;;e")
 
 // 用法: --env key1=value1 --env key2=value2
 c.MustParse()
@@ -118,15 +118,31 @@ import (
     "github.com/gookit/goutil/cflag"
 )
 
+// Version information (set by ldflags)
+var (
+	Version   = "dev"
+	CommitID  = "unknown"
+	BuildDate = "unknown"
+)
+
 func main() {
     var (
         host     string
         port     int
         logLevel string
         envVars  *cflag.KVString
+        showVer  bool
     )
 
     c := cflag.NewWith("server", "1.0.0", "HTTP server")
+
+	c.AfterFlagParse = func(c *cflag.CFlags) bool {
+		if showVer {
+			printVersion()
+			return false
+		}
+		return true
+	}
 
     c.StrVar(&host, "host", "h", "localhost", "Server host")
 
@@ -162,6 +178,13 @@ func main() {
             fmt.Printf("    %s=%s\n", k, v)
         }
     }
+}
+
+// printVersion prints version information
+func printVersion() {
+	ccolor.Printf("grepx version <green>%s</>\n\n", Version)
+	ccolor.Printf("Commit ID : <green>%s</>\n", CommitID)
+	ccolor.Printf("Build Date: <green>%s</>\n", BuildDate)
 }
 ```
 

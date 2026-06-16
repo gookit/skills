@@ -42,15 +42,25 @@ package cli
 import (
     "your-app/internal/config"
 
+    "github.com/gookit/goutil/cflag"
     "github.com/gookit/goutil/cflag/capp"
 	"github.com/gookit/goutil/strutil"
     "github.com/gookit/goutil/x/ccolor"
+)
+
+var (
+	appVersion   string
+	appGitHash   string
+	appBuildTime string
 )
 
 func Run(version, buildDate, commitID string) {
     if buildDate == "" {
         buildDate = time.Now().Format("2006-01-02 15:04:05")
     }
+    appVersion = version
+    appGitHash = commitID
+    appBuildTime = buildDate
 
     app := capp.NewApp()
     app.Name = "your-app"
@@ -70,13 +80,32 @@ var (
 	logLevel   string
 )
 
+// 添加全局选项
 func configApp(app *capp.App) {
-	app.StringVar(&configPath, "config", "config.yaml", "配置文件路径")
+	app.StringVar(&configPath, "config", "config.yaml", "配置文件路径;;c")
 	app.StringVar(&logLevel, "log-level", "info", "日志级别 (debug, info, warn, error)")
+
+    var showVersion bool
+	app.BoolVar(&showVersion, "version", false, "Show version information;;V")
+
+	app.AfterFlagParse = func(c *cflag.CFlags) bool {
+		if showVersion {
+			printVersion()
+			return false
+		}
+		return true
+	}
 }
 
 func addCommands(app *capp.App) {
     app.Add(newGetIPCmd(), newInitCmd(), newAddDhcpCmd())
+}
+
+// printVersion prints version information
+func printVersion() {
+	ccolor.Printf("grepx version <green>%s</>\n\n", appVersion)
+	ccolor.Printf("Commit ID : <green>%s</>\n", appGitHash)
+	ccolor.Printf("Build Date: <green>%s</>\n", appBuildTime)
 }
 
 func beforeRun(c *capp.Cmd, args []string) bool {
@@ -129,12 +158,14 @@ func runGetIP(opts *GetIPOptions) error {
 
 ### 1. 提供短选项和长选项
 
+> 提示： Cmd 是组合的 CFlag, 因此添加选项和参数的规则是一样的
+
 ```go
 // 推荐：同时提供短选项和长选项
-c.StrVar(&name, "name", "n", "", "User name")
+c.StrVar(&name, "name", "", "User name;;n")
 
 // 可接受：不常用标志只提供长选项
-c.BoolVar(&debug, "debug", "", false, "Debug mode")
+c.BoolVar(&debug, "debug", false, "Debug mode")
 ```
 
 ### 2. 使用合理的默认值

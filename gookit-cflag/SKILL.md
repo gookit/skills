@@ -46,10 +46,18 @@ go get github.com/gookit/goutil/cflag
 import "github.com/gookit/goutil/cflag"
 
 c := cflag.New()
-c.StrVar(&name, "name", "n", "", "Your name")
-c.IntVar(&age, "age", "a", 0, "Your age")
+c.StrVar(&name, "name", "", "Your name;;n")
+c.IntVar(&age, "age", 0, "Your age;;a")
 c.Parse()
 ```
+
+flag 描述格式为： `desc;required;short`
+
+其中：
+
+- desc: 描述文本
+- required: true/false 可省略
+- short: 短选项,多个逗号隔开 可省略
 
 ### 高级用法
 
