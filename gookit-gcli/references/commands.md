@@ -7,8 +7,35 @@ app := gcli.NewApp()
 app.Version = "1.0.3"
 app.Desc = "my cli application"
 // app.SetVerbose(gcli.VerbDebug)
-app.Run(nil)
+app.Run(nil) // 传 nil 等价 os.Args[1:]
 ```
+
+### 添加全局选项
+
+```go
+// app 上也有 Command 相同的选项绑定方法
+app.Flags().BoolOpt(...)
+app.Flags().StrOpt(...)
+```
+
+### 监听App事件
+
+```go
+app.On(gcli.EvtGOptionsParsed, func(ctx *gcli.HookCtx) (stop bool) {
+	// eg. bootstrap config load
+	return
+})
+```
+
+### 退出码
+
+`app.Run(args)` **返回进程退出码**（成功为 0）。需要把命令失败传播为非 0 退出码时：
+
+```go
+os.Exit(app.Run(nil))
+```
+
+> gcli 仅从实现了 `errorx.ErrorCoder` 的错误推导非 0 退出码（如 `errorx.Failf(code, ...)`）；普通 `error` 仅打印、退出码仍为成功值。命令需要非 0 退出时返回带 code 的错误。
 
 ## 添加命令
 
@@ -63,7 +90,7 @@ app.Add(&gcli.Command{
 })
 ```
 
-运行: `app child`
+运行: `app parent child`（多级子命令需带上父命令路径，不能只写 `app child`）
 
 ## 命令字段
 

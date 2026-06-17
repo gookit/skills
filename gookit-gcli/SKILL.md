@@ -53,10 +53,13 @@ func main() {
 
 - **选项绑定** - 支持 `--long` 长选项和 `-s` 短选项
 - **结构体绑定** - 通过标签绑定选项和参数
+- **参数取值** - `AddArg` 声明后用 `c.Arg("name").String()/.Strings()` 读取
+- **解析顺序** - 选项须在位置参数**之前**（遇首个非选项即停，不做交错解析）
+- **`--` 透传** - gcli 原生终止解析，用末尾数组参数承接 `-- <argv...>`
 - **验证器** - 自定义参数验证
 - **POSIX 风格** - 支持短选项组合 (`-ab`)
 
-详细用法见 [references/flags-args.md](references/flags-args.md)
+详细用法见 [references/flags-args.md](references/flags-args.md)（含解析顺序坑、`--` 透传、伪 `subcommand not found` 提示的消除）
 
 ### 颜色与交互
 

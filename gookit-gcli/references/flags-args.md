@@ -92,3 +92,58 @@ cmd.AddArg("arrArg", "description", false, true)
 - 必需参数必须在可选参数之前
 - 数组参数只能在最后定义
 - 支持 POSIX 风格短选项组合 (`-ab`)
+
+## 参数取值（绑定后如何读取）
+
+`AddArg` 只是**声明**；解析后用 `c.Arg("name")` 取到 `*gflag.CliArg`（内嵌 `structs.Value`），再按类型取值：
+
+```go
+c.Arg("key").String()    // 单值字符串
+c.Arg("id").Int()        // 整数
+c.Arg("cmd").Strings()   // 数组参数(Arrayed) -> []string；亦可 .Array()
+c.Arg("x").HasValue()    // 是否绑定了值
+```
+
+> 选项(Opt)的值直接写入 `Config` 里 `XxxOpt(&v, ...)` 绑定的变量 `v`，无需再取。
+
+## 参数与选项的解析顺序（重要·常见坑）
+
+gcli 的 flag 解析（gflag，仿标准库 `flag`）**遇到第一个非选项 token 就停止解析选项**，因此选项必须在位置参数之前：
+
+```bash
+mycmd --host-path X --force myproj     # ✅ 选项在前，--host-path 正常绑定
+mycmd myproj --host-path X             # ❌ 解析停在 myproj，--host-path 不绑定(落入剩余参数被忽略)
+```
+
+若要支持"位置参数在前"的写法，需在入口自行把前置位置参数重排到选项之后再 `app.Run(args)`——gcli 本身**不做**交错(interspersed)解析。
+
+## `--` 分隔符与透传参数（passthrough）
+
+gcli **原生处理 `--`**：遇到 `--` 即终止选项解析，其后所有 token 原样进入参数区（即使以 `-`/`--` 开头也不当选项）。**不要在入口自己切 `--`**。
+
+捕获 `--` 之后的原始命令：声明一个**末尾的可选数组参数**来承接，用 `c.Arg(...).Strings()` 读取：
+
+```go
+Config: func(c *gcli.Command) {
+    c.StrOpt(&agent, "agent", "a", "", "agent")
+    // 承接 `-- <argv...>`，如 `run -a exec -- go test -run X`
+    c.AddArg("cmd", "raw command after --", false, true) // 可选 + 数组
+},
+Func: func(c *gcli.Command, _ []string) error {
+    argv := c.Arg("cmd").Strings() // ["go","test","-run","X"]
+    _ = argv
+    return nil
+},
+```
+
+> **坑**：叶子命令若**未声明任何参数**(`!c.HasArguments()`)，给它传位置参数时会打印一行
+> `ERROR: <cmd> - subcommand 'X' is not found`（随后仍 fallthrough 执行 Func）。
+> 声明一个（数组）参数来承接，即可**同时消除该提示并拿到值**——优于读 Func 的剩余参数。
+
+## Func 第二个参数 `args`
+
+```go
+Func: func(c *gcli.Command, args []string) error { ... }
+```
+
+> `args` 是**选项与命名参数都消费完后剩余的 token**，一般为空。特殊场景（未用 `AddArg` 声明时）可用它读 `--` 之后的透传值；但优先用 `AddArg` + `c.Arg(...)`（见上，且能消除上面的伪提示）。
