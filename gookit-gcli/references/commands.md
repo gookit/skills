@@ -1,117 +1,112 @@
-# 命令管理
+# 应用与命令
 
-## 创建应用
-
-```go
-app := gcli.NewApp()
-app.Version = "1.0.3"
-app.Desc = "my cli application"
-// app.SetVerbose(gcli.VerbDebug)
-app.Run(nil) // 传 nil 等价 os.Args[1:]
-```
-
-### 添加全局选项
+## App
 
 ```go
-// app 上也有 Command 相同的选项绑定方法
-app.Flags().BoolOpt(...)
-app.Flags().StrOpt(...)
+app := gcli.NewApp()            // 等价 gcli.New()
+app.Name = "myapp"
+app.Version = "1.0.0"           // 默认 "0.1.0-dev"
+app.Desc = "my cli app"
+app.SetLogo("ASCII logo", "info")
+os.Exit(app.Run(nil))           // nil => os.Args[1:]
 ```
 
-### 监听App事件
+- `app.Run(args)` 返回退出码；`ExitOnEnd` 默认 false（不会自己退出）。`gcli.NewApp(gcli.NotExitOnEnd())` 与默认等价，可显式写出意图。
+- 其它入口：`app.QuickRun()`（用 os.Args）、`app.RunArgs("cmd", "-a")`、`app.RunLine("cmd -a val")`。
+- `app.Func`：无命令名时执行（为空则显示帮助）。`app.SetDefaultCommand("name")`：无命令名时默认跑某命令。
+- 应用级选项（写在命令名之前）：`app.Flags().StrOpt(&cfg, "config", "c", "", "config file")`，如 `myapp -c x.yml cmd`。
+- 全局选项只有 `-h/--help`、`-V/--version`、`--gen-completion`。
+
+## 退出码
+
+| 情形 | 码 |
+|---|---|
+| 成功 | 0 |
+| `Func` 返回普通 `error`、解析/校验错误、未知命令、panic | 2 |
+| 返回实现 `errorx.ErrorCoder` 的错误 | 其 `Code()` |
 
 ```go
-app.On(gcli.EvtGOptionsParsed, func(ctx *gcli.HookCtx) (stop bool) {
-	// eg. bootstrap config load
-	return
-})
+import "github.com/gookit/goutil/errorx"
+
+return errorx.Failf(7, "deploy failed: %s", reason) // 退出码 7
 ```
 
-### 退出码
+`c.NewErrf(...)` 只是 `fmt.Errorf` 的包装，不改变退出码。
 
-`app.Run(args)` **返回进程退出码**（成功为 0）。需要把命令失败传播为非 0 退出码时：
-
-```go
-os.Exit(app.Run(nil))
-```
-
-> gcli 仅从实现了 `errorx.ErrorCoder` 的错误推导非 0 退出码（如 `errorx.Failf(code, ...)`）；普通 `error` 仅打印、退出码仍为成功值。命令需要非 0 退出时返回带 code 的错误。
-
-## 添加命令
-
-### 直接定义
+## 定义命令
 
 ```go
 app.Add(&gcli.Command{
-    Name:    "demo",
-    Desc:    "this is a description",
-    Aliases: []string{"dm"},
-    Func: func(cmd *gcli.Command, args []string) error {
-        gcli.Println("hello, in the demo command")
-        return nil
-    },
+    Name:     "demo",
+    Desc:     "desc with <info>color</> and {$cmd}", // 支持颜色标签与帮助变量
+    Aliases:  []string{"dm"},
+    Category: "tools",    // 帮助中分组
+    Hidden:   false,
+    Examples: "{$binName} {$cmd} --id 12 file",
+    Config:   func(c *gcli.Command) { /* 绑定选项/参数 */ },
+    Func:     func(c *gcli.Command, args []string) error { return nil },
 })
+
+// 或
+cmd := gcli.NewCommand("demo", "desc", func(c *gcli.Command) { /* Config */ })
+cmd.Func = func(c *gcli.Command, args []string) error { return nil }
+app.Add(cmd)         // 一次可 app.Add(a, b, c)；也可 cmd.AttachTo(app)
 ```
 
-### 独立命令变量
+`Func` 的 `args` 是选项与命名参数消费后**剩余**的位置参数（声明了数组参数时通常为空）。
+`Config` 在加入 app 时执行一次；选项值写入 `Config` 里绑定的变量，命令间不要共用包级变量。
 
-```go
-var MyCmd = &gcli.Command{
-    Name:    "demo",
-    Desc:    "demo command",
-    Aliases: []string{"dm"},
-    Func: func(cmd *gcli.Command, args []string) error {
-        gcli.Println("hello")
-        return nil
-    },
-    Subs: []*gcli.Command{},
-}
-
-app.Add(MyCmd)
-```
+帮助变量：`{$cmd} {$fullCmd} {$binName} {$binWithCmd} {$binWithPath} {$binDir} {$workDir}`。
 
 ## 子命令
 
 ```go
-app.Add(&gcli.Command{
-    Name: "parent",
-    Desc: "parent command",
-    Subs: []*gcli.Command{
-        {
-            Name:    "child",
-            Desc:    "child command",
-            Aliases: []string{"c"},
-            Func: func(c *gcli.Command, args []string) error {
-                gcli.Println("child command executed")
-                return nil
-            },
-        },
-    },
+parent := &gcli.Command{Name: "git", Desc: "git tools"}
+parent.Add(gcli.NewCommand("status", "show status", func(c *gcli.Command) {
+    c.Func = func(c *gcli.Command, _ []string) error { return nil }
+}))
+app.Add(parent)
+```
+
+- 运行 `app git status`；需带完整父路径。无 `Func` 的父命令会显示子命令帮助。
+- 子命令找不到：父命令**没有声明参数**时报 `git - subcommand 'x' is not found`（退出码 2）；声明了参数的命令则把它当作参数。
+- `c.Path()` 如 `git status`；`c.ID()` 如 `git:status`；`c.Parent()`、`c.Root()`、`c.App()`。
+- 在命令里调用其它命令：`c.App().Exec("git status", []string{"-a"})`（返回 error，不走退出码）。
+
+## 中间件
+
+```go
+app.Use(func(c *gcli.Command, args []string) error { return nil })     // 所有命令，先执行
+cmd.Use(authCheck)                                                       // 单命令，后于 app 级
+```
+
+按注册顺序执行，任一返回 error 即中止，主 `Func` 不再执行。panic 会被恢复并转成 error（码 2）。
+
+## 钩子事件
+
+```go
+app.On(gcli.EvtAppOptsParsed, func(ctx *gcli.HookCtx) (stop bool) {
+    // 例如加载配置；返回 true 则停止后续运行
+    return false
 })
+cmd.On(gcli.EvtCmdRunBefore, hookFn)
 ```
 
-运行: `app parent child`（多级子命令需带上父命令路径，不能只写 `app child`）
+常用：`EvtAppInitBefore / EvtAppInit / EvtAppOptsParsed / EvtAppPrepareAfter / EvtAppExit / EvtCmdNotFound / EvtCmdSubNotFound / EvtCmdOptParsed / EvtCmdRunBefore / EvtCmdRunAfter / EvtCmdRunError`（常量也在 `gcli/v3/gevent` 包，名为 `On*`）。
 
-## 命令字段
+## Handler 接口
 
-| 字段 | 说明 |
-|------|------|
-| `Name` | 命令名称 |
-| `Desc` | 命令描述 |
-| `Aliases` | 命令别名列表 |
-| `Func` | 命令执行函数 |
-| `Config` | 命令配置函数（初始化时调用） |
-| `Subs` | 子命令列表 |
+```go
+type hello struct{ name string }
 
-## 帮助信息
+func (h *hello) Creator() *gcli.Command { return &gcli.Command{Name: "hello", Desc: "say hello"} }
+func (h *hello) Config(c *gcli.Command) { c.StrOpt(&h.name, "name", "n", "world", "who") }
+func (h *hello) Execute(c *gcli.Command, args []string) error { return nil }
 
-```bash
-./cliapp           # 显示所有命令
-./cliapp -h        # 显示帮助
-./cliapp --help    # 显示帮助
-./cliapp cmd -h    # 显示指定命令帮助
+app.AddHandler(&hello{})
 ```
 
-## 错误提示
+## 帮助与分类
 
-输入错误命令时，自动提示相似命令和别名。
+- `myapp`（无参）、`myapp -h`、`myapp help [cmd]`、`myapp cmd -h` 显示帮助；输入错误命令时提示相似命令。
+- 命令 `Category` 与选项 `gflag.WithCategory("x")` 用于帮助分组。

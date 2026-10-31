@@ -1,124 +1,54 @@
-# 数据展示 (show 包)
+# 数据展示（cliui/show）
 
-import 路径: `github.com/gookit/gcli/v3/show`
+import：`github.com/gookit/cliui/show`（**不是** `gcli/v3/show`）。
 
 ## 快捷函数
 
 ```go
-import "github.com/gookit/gcli/v3/show"
+import "github.com/gookit/cliui/show"
 
-// 键值列表
-show.AList("User Info", map[string]any{
-    "Name": "Tom",
-    "Age":  30,
-    "Role": "admin",
+show.AList("User Info", map[string]any{"Name": "Tom", "Age": 30}) // 键值列表
+show.MList(map[string]any{                                        // 多组列表
+    "Server": map[string]any{"Host": "localhost"},
+    "DB":     map[string]any{"Name": "app"},
 })
-
-// 多组键值列表 (map of maps)
-show.MList(map[string]any{
-    "Server": map[string]any{"Host": "localhost", "Port": 8080},
-    "DB":     map[string]any{"Host": "db:5432", "Name": "app"},
-})
-
-// JSON 格式化输出
-show.JSON(myStruct)
-show.JSON(myStruct, "", "  ") // 自定义缩进
-
-// 标题横幅
-show.Banner("Welcome to MyApp")
-
-// 标题行
-show.ATitle("Section Title")
+show.JSON(v)                    // 美化 JSON；show.JSON(v, "", "  ") 自定义前缀/缩进
+show.Banner("Welcome")          // 边框横幅
+show.ATitle("Section")          // 标题行
 ```
 
-## 表格 (show/table)
+`show.NewList(title, data)` / `show.NewLists(listMap)` / `show.NewBanner(...)` 返回对象，可调用 `.Format()` 输出。
 
-import 路径: `github.com/gookit/gcli/v3/show/table`
-
-### 手动构建
+## 表格 `show/table`
 
 ```go
-import "github.com/gookit/gcli/v3/show/table"
+import "github.com/gookit/cliui/show/table"
 
 table.New("Users").
-    SetHeads("Name", "Age", "City").
-    AddRow("Tom", 25, "Beijing").
-    AddRow("Jerry", 30, "Shanghai").
-    Format() // 直接打印到终端
+    SetHeads("Name", "Age").
+    AddRow("Tom", 25).
+    AddRow("Jerry", 30).
+    Format() // 直接打印；Render() 返回 string
+
+// struct slice：字段名即表头
+type User struct { Name string; Age int }
+table.New("Team").SetRows([]User{{"Tom", 25}}).Format()
+
+// [][]any
+table.New("R").SetHeads("ID", "Msg").SetRows([][]any{{1, "ok"}}).Format()
 ```
 
-### struct slice 自动映射
+样式：`WithStyle(table.StyleRounded)`；可选 `StyleMySql StyleSimple StyleMarkdown StyleBold StyleRounded StyleDouble StyleMinimal StyleBoldBorder`。
+其它选项：`table.New(title, table.WithStyle(...), table.WithShowRowNumber(true), table.WithoutBorder(), table.WithCSVOutput(true))`。
 
-字段名自动作为表头，无需手动 `SetHeads`：
+## 列表 `show/lists`
 
 ```go
-type User struct {
-    Name string
-    Age  int
-    Job  string
-}
+import "github.com/gookit/cliui/show/lists"
 
-table.New("Team").
-    SetRows([]User{
-        {"Tom", 25, "Engineer"},
-        {"Jerry", 30, "Designer"},
-    }).
-    Format()
+lists.NewList("Config", map[string]any{"key": "val"}).Format()
 ```
 
-### `[][]any` 行数据
+## 其它子包
 
-```go
-table.New("Report").
-    SetHeads("ID", "Status", "Msg").
-    SetRows([][]any{
-        {1, "OK", "success"},
-        {2, "ERR", "timeout"},
-    }).
-    Format()
-```
-
-### 样式
-
-| 常量 | 效果 |
-|------|------|
-| `table.StyleMySql` | MySQL 风格边框 |
-| `table.StyleSimple` | 简洁无外框 |
-| `table.StyleMarkdown` | Markdown 表格格式 |
-| `table.StyleBold` | 加粗边框 |
-| `table.StyleRounded` | 圆角边框 |
-| `table.StyleDouble` | 双线边框 |
-| `table.StyleMinimal` | 极简风格 |
-| `table.StyleBoldBorder` | 加粗外框 |
-
-```go
-table.New("Styled").
-    SetHeads("ID", "Name").
-    AddRow(1, "Alice").
-    WithStyle(table.StyleRounded).
-    Format()
-```
-
-### 获取字符串而非打印
-
-```go
-output := table.New("Data").
-    SetHeads("K", "V").
-    AddRow("foo", "bar").
-    Render() // 返回 string
-
-fmt.Fprint(w, output)
-```
-
-## 列表 (show/lists)
-
-```go
-import "github.com/gookit/gcli/v3/show/lists"
-
-// 单个列表
-l := lists.NewList("Config", map[string]any{"key": "val"})
-l.Format()
-
-// 通过 show 包快捷调用
-show.NewList("Config", map[string]any{"key": "val"}).Format()
-```
+`show/alert`（提示消息）、`show/title`、`show/banner`、`show/emoji`、`show/symbols`。输出重定向用 `cliui.SetOutput(w)` / `cliui.CustomIO(in, out)`。
